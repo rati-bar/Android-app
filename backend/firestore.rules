@@ -1,0 +1,114 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isParent() {
+      return isAuthenticated() &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'PARENT';
+    }
+
+    function isChild() {
+      return isAuthenticated() &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'CHILD';
+    }
+
+    function isInFamily(familyId) {
+      return isAuthenticated() &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.familyId == familyId;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isParent());
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow update: if isAuthenticated() && (isOwner(userId) || isParent());
+      allow delete: if false; // Never allow user deletion
+    }
+
+    // Families collection
+    match /families/{familyId} {
+      allow read: if isAuthenticated() && isInFamily(familyId);
+      allow create: if isAuthenticated() && isParent();
+      allow update: if isAuthenticated() && isParent() && isInFamily(familyId);
+      allow delete: if isAuthenticated() && isParent() && isInFamily(familyId);
+    }
+
+    // Tasks collection
+    match /tasks/{taskId} {
+      allow read: if isAuthenticated() && isInFamily(resource.data.familyId);
+
+      allow create: if isAuthenticated() &&
+                       isParent() &&
+                       isInFamily(request.resource.data.familyId);
+
+      allow update: if isAuthenticated() &&
+                       (
+                         // Parent can update any field
+                         (isParent() && isInFamily(resource.data.familyId)) ||
+                         // Child can only mark as COMPLETED
+                         (isChild() &&
+                          isOwner(resource.data.childId) &&
+                          request.resource.data.status == 'COMPLETED' &&
+                          resource.data.status == 'PENDING')
+                       );
+
+      allow delete: if isAuthenticated() &&
+                       isParent() &&
+                       isInFamily(resource.data.familyId);
+    }
+
+    // Time balances - read-only for children, write-only for Cloud Functions
+    match /timeBalances/{childId} {
+      allow read: if isAuthenticated() && (isOwner(childId) || isParent());
+      allow write: if false; // Only Cloud Functions can write
+    }
+
+    // Time logs - append-only by Cloud Functions
+    match /timeLogs/{logId} {
+      allow read: if isAuthenticated() &&
+                     (isOwner(resource.data.childId) || isParent());
+      allow create, update, delete: if false; // Only Cloud Functions
+    }
+
+    // App usage logs
+    match /appUsage/{usageId} {
+      allow read: if isAuthenticated() &&
+                     (isOwner(resource.data.childId) || isParent());
+      allow create: if isAuthenticated() && isChild() && isOwner(request.resource.data.childId);
+      allow update, delete: if false;
+    }
+
+    // Blocked sessions
+    match /blockedSessions/{sessionId} {
+      allow read: if isAuthenticated() &&
+                     (isOwner(resource.data.childId) || isParent());
+      allow create: if isAuthenticated() && isChild() && isOwner(request.resource.data.childId);
+      allow update: if isAuthenticated() && isParent();
+      allow delete: if false;
+    }
+
+    // Security events - critical logging
+    match /securityEvents/{eventId} {
+      allow read: if isAuthenticated() && isParent();
+      allow create: if isAuthenticated() && isChild() && isOwner(request.resource.data.childId);
+      allow update, delete: if false; // Immutable once created
+    }
+
+    // Notifications
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && isOwner(resource.data.userId);
+      allow create: if false; // Only Cloud Functions
+      allow update: if isAuthenticated() && isOwner(resource.data.userId);
+      allow delete: if isAuthenticated() && isOwner(resource.data.userId);
+    }
+  }
+}

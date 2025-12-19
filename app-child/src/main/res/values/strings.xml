@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Screen Time</string>
+
+    <!-- Device Admin -->
+    <string name="device_admin_description">Screen Time requires device administrator privileges to enforce time limits and block apps when time runs out. This ensures parental controls cannot be bypassed.</string>
+
+    <!-- Time Display -->
+    <string name="time_remaining">Time Remaining</string>
+    <string name="time_depleted">Time Depleted</string>
+    <string name="time_format_hours_minutes">%dh %dm</string>
+    <string name="time_format_minutes_seconds">%dm %ds</string>
+
+    <!-- Tasks -->
+    <string name="tasks_title">Today\'s Tasks</string>
+    <string name="task_pending">Pending</string>
+    <string name="task_completed">Completed - Waiting for approval</string>
+    <string name="task_approved">Approved</string>
+    <string name="task_rejected">Rejected</string>
+    <string name="mark_as_done">Mark as Done</string>
+    <string name="task_reward">Reward: %d minutes</string>
+
+    <!-- Blocked Screen -->
+    <string name="blocked_title">Time\'s Up!</string>
+    <string name="blocked_message">You\'ve used all your screen time for today. Complete tasks to earn more time!</string>
+    <string name="blocked_no_tasks">No tasks available. Please ask your parent to add tasks.</string>
+    <string name="request_emergency_unlock">Request Emergency Unlock</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_time_tracking">Time Tracking</string>
+    <string name="notification_channel_security">Security Alerts</string>
+    <string name="notification_channel_tasks">Tasks</string>
+    <string name="notification_time_low_title">Low Screen Time</string>
+    <string name="notification_time_low_message">Only %d minutes remaining</string>
+    <string name="notification_task_approved_title">Task Approved!</string>
+    <string name="notification_task_approved_message">You earned %d minutes for completing \"%s\"</string>
+
+    <!-- Setup -->
+    <string name="setup_welcome">Welcome to Screen Time</string>
+    <string name="setup_device_owner_required">This app requires Device Owner setup</string>
+    <string name="setup_instructions">Please follow the setup instructions to configure parental controls</string>
+
+    <!-- Errors -->
+    <string name="error_no_permission">Permission required. Please grant the necessary permissions.</string>
+    <string name="error_not_device_owner">App is not configured as Device Owner. Please complete setup.</string>
+    <string name="error_network">Network error. Some features may not be available offline.</string>
+
+    <!-- Security -->
+    <string name="security_alert">Security Alert</string>
+    <string name="security_time_change">Time change detected</string>
+    <string name="security_root_detected">Rooted device detected</string>
+    <string name="security_tampering_detected">Tampering detected</string>
+</resources>
