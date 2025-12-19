@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Play Store Compliant Manifest - Notification-Only Version -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- ALLOWED PERMISSIONS ONLY -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Usage stats - requires user permission -->
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+
+    <!-- REMOVED - Not needed for notification-only version -->
+    <!-- <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" /> -->
+    <!-- <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" /> -->
+    <!-- <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" /> -->
+    <!-- <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> -->
+    <!-- <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" /> -->
+
+    <application>
+
+        <!-- TimeDepletedActivity - Dismissible notification screen -->
+        <activity
+            android:name="com.screetime.child.ui.timedepleted.TimeDepletedActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ScreenTime" />
+
+        <!-- Time Change Receiver - still useful for tracking -->
+        <receiver
+            android:name="com.screetime.child.service.TimeChangeReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- REMOVED FOR PLAY STORE VERSION -->
+        <!-- Device Admin Receiver - Not allowed -->
+        <!-- <receiver android:name=".service.ScreenTimeDeviceAdminReceiver" ... /> -->
+
+        <!-- Boot Receiver - Not needed -->
+        <!-- <receiver android:name=".service.BootReceiver" ... /> -->
+
+        <!-- App Blocking Service - Not needed -->
+        <!-- <service android:name=".service.AppBlockingService" ... /> -->
+
+        <!-- Blocked Activity (Kiosk Mode) - Not needed -->
+        <!-- <activity android:name=".ui.blocked.BlockedActivity" ... /> -->
+
+    </application>
+
+</manifest>

@@ -161,17 +161,40 @@ class TimeTrackingService : Service(), CoroutineScope {
         // Show depleted notification
         showTimeDepletedNotification()
 
-        // Start app blocking service
-        val blockIntent = Intent(this, AppBlockingService::class.java).apply {
-            action = AppBlockingService.ACTION_BLOCK_DEVICE
-        }
-        startService(blockIntent)
+        // Notify parent via Firestore
+        notifyParentOfTimeDepletion()
 
-        // Launch blocked activity
-        val blockedIntent = Intent(this, com.screetime.child.ui.blocked.BlockedActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        if (com.screetime.child.BuildConfig.ENFORCEMENT_ENABLED) {
+            // PRO VERSION: Block all apps and enter kiosk mode
+            Log.i(TAG, "Enforcement enabled - blocking device")
+
+            // Start app blocking service
+            val blockIntent = Intent(this, AppBlockingService::class.java).apply {
+                action = AppBlockingService.ACTION_BLOCK_DEVICE
+            }
+            startService(blockIntent)
+
+            // Launch blocked activity (kiosk mode)
+            val blockedIntent = Intent(this, com.screetime.child.ui.blocked.BlockedActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+            startActivity(blockedIntent)
+        } else {
+            // PLAY STORE VERSION: Just show dismissible notification and alert
+            Log.i(TAG, "Notification mode - showing time depleted screen")
+
+            // Launch time depleted activity (dismissible)
+            val depletedIntent = Intent(this, com.screetime.child.ui.timedepleted.TimeDepletedActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            startActivity(depletedIntent)
         }
-        startActivity(blockedIntent)
+    }
+
+    private fun notifyParentOfTimeDepletion() {
+        // TODO: Implement Firestore notification to parent
+        // This will trigger Cloud Function to send FCM to parent
+        Log.i(TAG, "Notifying parent of time depletion")
     }
 
     private fun createNotificationChannels() {

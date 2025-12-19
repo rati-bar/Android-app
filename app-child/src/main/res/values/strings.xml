@@ -50,4 +50,20 @@
     <string name="security_time_change">Time change detected</string>
     <string name="security_root_detected">Rooted device detected</string>
     <string name="security_tampering_detected">Tampering detected</string>
+
+    <!-- Time Depleted Screen (Notification Version) -->
+    <string name="time_depleted_title">Screen Time Ended</string>
+    <string name="time_depleted_message">You\'ve used all your earned time for today.</string>
+    <string name="time_depleted_cta">Complete tasks to earn more screen time!</string>
+    <string name="time_depleted_parent_notified">Your parent has been notified</string>
+    <string name="time_depleted_view_tasks">View Tasks</string>
+    <string name="time_depleted_i_understand">I Understand</string>
+    <string name="time_depleted_enable_lock">Enable Full Lock Mode</string>
+    <string name="time_depleted_lock_confirmation">This will lock the device to only Screen Time app until you earn more time. You won\'t be able to exit.</string>
+
+    <!-- Version Info -->
+    <string name="version_playstore">Play Store Edition</string>
+    <string name="version_pro">Pro Edition</string>
+    <string name="enforcement_mode">Enforcement Mode</string>
+    <string name="notification_mode">Notification Mode</string>
 </resources>

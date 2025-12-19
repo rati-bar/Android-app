@@ -9,6 +9,7 @@ import { onTaskApproved, onTaskRejected } from './tasks/taskApproval';
 import { dailyReset } from './time/dailyReset';
 import { onFamilyCreated } from './family/familyManagement';
 import { logSecurityEvent } from './security/securityMonitoring';
+import { onTimeDepletionNotification, onTimeDepletedEvent } from './notifications/timeDepletion';
 
 // Export Cloud Functions
 
@@ -24,6 +25,10 @@ export const familyCreated = onFamilyCreated;
 
 // Security
 export const securityEventLogged = logSecurityEvent;
+
+// Notifications
+export const timeDepletionNotification = onTimeDepletionNotification;
+export const timeDepletedEvent = onTimeDepletedEvent;
 
 // Test function
 export const helloWorld = functions.https.onRequest((request, response) => {

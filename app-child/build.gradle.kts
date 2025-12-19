@@ -24,6 +24,33 @@ android {
         }
     }
 
+    flavorDimensions += "version"
+
+    productFlavors {
+        create("playstore") {
+            dimension = "version"
+            applicationIdSuffix = ".lite"
+            versionNameSuffix = "-lite"
+
+            // Play Store compliant - notification only
+            buildConfigField("Boolean", "ENFORCEMENT_ENABLED", "false")
+            buildConfigField("String", "VERSION_TYPE", "\"Play Store Edition\"")
+
+            // Use different app name
+            resValue("string", "app_name", "Screen Time Lite")
+        }
+
+        create("pro") {
+            dimension = "version"
+
+            // Full enforcement with Device Owner
+            buildConfigField("Boolean", "ENFORCEMENT_ENABLED", "true")
+            buildConfigField("String", "VERSION_TYPE", "\"Pro Edition\"")
+
+            resValue("string", "app_name", "Screen Time Pro")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
