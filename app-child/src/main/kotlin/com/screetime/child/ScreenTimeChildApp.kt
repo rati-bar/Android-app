@@ -33,6 +33,12 @@ class ScreenTimeChildApp : Application() {
 
     private fun initializeFirebase() {
         try {
+            // Skip Firebase initialization in debug builds or if using demo config
+            if (BuildConfig.DEBUG) {
+                Log.i(TAG, "Skipping Firebase initialization in debug build")
+                return
+            }
+
             FirebaseApp.initializeApp(this)
             Log.i(TAG, "Firebase initialized")
 
