@@ -8,8 +8,8 @@
     <!-- Time Display -->
     <string name="time_remaining">Time Remaining</string>
     <string name="time_depleted">Time Depleted</string>
-    <string name="time_format_hours_minutes">%dh %dm</string>
-    <string name="time_format_minutes_seconds">%dm %ds</string>
+    <string name="time_format_hours_minutes">%1$dh %2$dm</string>
+    <string name="time_format_minutes_seconds">%1$dm %2$ds</string>
 
     <!-- Tasks -->
     <string name="tasks_title">Today\'s Tasks</string>
@@ -33,7 +33,7 @@
     <string name="notification_time_low_title">Low Screen Time</string>
     <string name="notification_time_low_message">Only %d minutes remaining</string>
     <string name="notification_task_approved_title">Task Approved!</string>
-    <string name="notification_task_approved_message">You earned %d minutes for completing \"%s\"</string>
+    <string name="notification_task_approved_message">You earned %1$d minutes for completing \"%2$s\"</string>
 
     <!-- Setup -->
     <string name="setup_welcome">Welcome to Screen Time</string>
