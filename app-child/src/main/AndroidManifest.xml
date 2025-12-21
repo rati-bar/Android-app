@@ -152,6 +152,13 @@
                 tools:node="remove" />
         </provider>
 
+        <!-- Disable Firebase auto-initialization for debug builds -->
+        <provider
+            android:name="com.google.firebase.provider.FirebaseInitProvider"
+            android:authorities="${applicationId}.firebaseinitprovider"
+            android:exported="false"
+            tools:node="remove" />
+
     </application>
 
 </manifest>
