@@ -49,6 +49,12 @@ class ScreenTimeChildApp : Application() {
     }
 
     private fun startTimeTrackingIfNeeded() {
+        // Only check device owner in enforcement-enabled (Pro) version
+        if (!BuildConfig.ENFORCEMENT_ENABLED) {
+            Log.i(TAG, "Play Store Lite version - skipping device owner check")
+            return
+        }
+
         // Check if device owner is set
         if (com.screetime.child.service.ScreenTimeDeviceAdminReceiver.isDeviceOwner(this)) {
             Log.i(TAG, "Device owner is set - starting time tracking service")
