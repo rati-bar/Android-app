@@ -1,4 +1,5 @@
-import * as functions from 'firebase-functions';
+import { onDocumentUpdated } from 'firebase-functions/v2/firestore';
+import { HttpsError } from 'firebase-functions/v2/https';
 import * as admin from 'firebase-admin';
 
 const db = admin.firestore();
@@ -8,12 +9,20 @@ const messaging = admin.messaging();
  * Cloud Function triggered when a task status changes to APPROVED.
  * Grants time minutes to the child's balance and sends notification.
  */
-export const onTaskApproved = functions.firestore
-  .document('tasks/{taskId}')
-  .onUpdate(async (change, context) => {
-    const before = change.before.data();
-    const after = change.after.data();
-    const taskId = context.params.taskId;
+export const onTaskApproved = onDocumentUpdated('tasks/{taskId}', async (event) => {
+    if (!event.data) {
+      console.error('No data in event');
+      return;
+    }
+
+    const before = event.data.before.data();
+    const after = event.data.after.data();
+    const taskId = event.params.taskId;
+
+    if (!before || !after) {
+      console.error('Missing before or after data');
+      return;
+    }
 
     // Check if task was just approved
     if (before.status !== 'APPROVED' && after.status === 'APPROVED') {
@@ -82,7 +91,7 @@ export const onTaskApproved = functions.firestore
 
       } catch (error) {
         console.error('Error processing task approval:', error);
-        throw new functions.https.HttpsError('internal', 'Failed to process task approval');
+        throw new HttpsError('internal', 'Failed to process task approval');
       }
     }
   });
@@ -91,12 +100,20 @@ export const onTaskApproved = functions.firestore
  * Cloud Function triggered when a task status changes to REJECTED.
  * Sends notification to child with rejection reason.
  */
-export const onTaskRejected = functions.firestore
-  .document('tasks/{taskId}')
-  .onUpdate(async (change, context) => {
-    const before = change.before.data();
-    const after = change.after.data();
-    const taskId = context.params.taskId;
+export const onTaskRejected = onDocumentUpdated('tasks/{taskId}', async (event) => {
+    if (!event.data) {
+      console.error('No data in event');
+      return;
+    }
+
+    const before = event.data.before.data();
+    const after = event.data.after.data();
+    const taskId = event.params.taskId;
+
+    if (!before || !after) {
+      console.error('Missing before or after data');
+      return;
+    }
 
     // Check if task was just rejected
     if (before.status !== 'REJECTED' && after.status === 'REJECTED') {

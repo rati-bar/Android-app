@@ -1,4 +1,4 @@
-import * as functions from 'firebase-functions';
+import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import * as admin from 'firebase-admin';
 
 const db = admin.firestore();
@@ -7,11 +7,14 @@ const db = admin.firestore();
  * Cloud Function triggered when a new family is created.
  * Sets up default tasks and initializes time balances for children.
  */
-export const onFamilyCreated = functions.firestore
-  .document('families/{familyId}')
-  .onCreate(async (snap, context) => {
-    const familyId = context.params.familyId;
-    const familyData = snap.data();
+export const onFamilyCreated = onDocumentCreated('families/{familyId}', async (event) => {
+    const familyId = event.params.familyId;
+    const familyData = event.data?.data();
+
+    if (!familyData) {
+      console.error('No family data found');
+      return;
+    }
 
     console.log(`New family created: ${familyId}`);
 

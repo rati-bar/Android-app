@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions';
+import { onRequest } from 'firebase-functions/v2/https';
 
 // Initialize Firebase Admin
 admin.initializeApp();
@@ -31,6 +31,6 @@ export const timeDepletionNotification = onTimeDepletionNotification;
 export const timeDepletedEvent = onTimeDepletedEvent;
 
 // Test function
-export const helloWorld = functions.https.onRequest((request, response) => {
+export const helloWorld = onRequest((request, response) => {
   response.send("Screen Time Calculator Backend is running!");
 });

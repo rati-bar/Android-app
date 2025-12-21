@@ -1,4 +1,4 @@
-import * as functions from 'firebase-functions';
+import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import * as admin from 'firebase-admin';
 
 const db = admin.firestore();
@@ -8,10 +8,13 @@ const messaging = admin.messaging();
  * Cloud Function triggered when child's time is depleted.
  * Sends notification to parent immediately.
  */
-export const onTimeDepletionNotification = functions.firestore
-  .document('timeLogs/{logId}')
-  .onCreate(async (snap, context) => {
-    const logData = snap.data();
+export const onTimeDepletionNotification = onDocumentCreated('timeLogs/{logId}', async (event) => {
+    const logData = event.data?.data();
+
+    if (!logData) {
+      console.error('No log data found');
+      return;
+    }
 
     // Check if this is a time depletion event (remaining time reached 0)
     if (logData.action === 'USED' && logData.balanceAfter === 0) {
@@ -110,10 +113,14 @@ export const onTimeDepletionNotification = functions.firestore
 /**
  * Alternative: Simpler version that listens to a dedicated timeDepleted collection
  */
-export const onTimeDepletedEvent = functions.firestore
-  .document('timeDepletedEvents/{eventId}')
-  .onCreate(async (snap, context) => {
-    const eventData = snap.data();
+export const onTimeDepletedEvent = onDocumentCreated('timeDepletedEvents/{eventId}', async (event) => {
+    const eventData = event.data?.data();
+
+    if (!eventData) {
+      console.error('No event data found');
+      return;
+    }
+
     const childId = eventData.childId;
 
     console.log(`Time depleted event for child: ${childId}`);

@@ -1,4 +1,4 @@
-import * as functions from 'firebase-functions';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
 import * as admin from 'firebase-admin';
 
 const db = admin.firestore();
@@ -8,10 +8,12 @@ const messaging = admin.messaging();
  * Scheduled Cloud Function that runs daily at midnight to reset tasks and time.
  * Schedule: Every day at 00:00 (midnight)
  */
-export const dailyReset = functions.pubsub
-  .schedule('0 0 * * *')
-  .timeZone('America/New_York') // Change to your timezone
-  .onRun(async (context) => {
+export const dailyReset = onSchedule(
+  {
+    schedule: '0 0 * * *',
+    timeZone: 'America/New_York', // Change to your timezone
+  },
+  async (event) => {
     console.log('Starting daily reset...');
 
     try {

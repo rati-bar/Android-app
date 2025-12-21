@@ -1,4 +1,4 @@
-import * as functions from 'firebase-functions';
+import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import * as admin from 'firebase-admin';
 
 const db = admin.firestore();
@@ -8,11 +8,14 @@ const messaging = admin.messaging();
  * Cloud Function triggered when a security event is logged.
  * Notifies parent of critical security events.
  */
-export const logSecurityEvent = functions.firestore
-  .document('securityEvents/{eventId}')
-  .onCreate(async (snap, context) => {
-    const eventData = snap.data();
-    const eventId = context.params.eventId;
+export const logSecurityEvent = onDocumentCreated('securityEvents/{eventId}', async (event) => {
+    const eventData = event.data?.data();
+    const eventId = event.params.eventId;
+
+    if (!eventData) {
+      console.error('No event data found');
+      return;
+    }
 
     console.log(`Security event logged: ${eventData.eventType}`);
 
