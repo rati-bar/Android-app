@@ -1,5 +1,7 @@
 package com.screetime.child.ui
 
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -17,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.screetime.child.data.model.Task
 import com.screetime.child.data.model.TaskStatus
+import com.screetime.child.service.TimeTrackingService
 import com.screetime.core.designsystem.theme.ScreenTimeTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -28,6 +31,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Start time tracking service
+        startTimeTrackingService()
+
         setContent {
             ScreenTimeTheme {
                 Surface(
@@ -37,6 +43,15 @@ class MainActivity : ComponentActivity() {
                     MainScreen(viewModel)
                 }
             }
+        }
+    }
+
+    private fun startTimeTrackingService() {
+        val intent = Intent(this, TimeTrackingService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent)
+        } else {
+            startService(intent)
         }
     }
 }

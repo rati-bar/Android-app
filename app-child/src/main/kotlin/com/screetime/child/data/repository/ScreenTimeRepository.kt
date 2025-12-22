@@ -85,4 +85,59 @@ class ScreenTimeRepository @Inject constructor() {
             false
         }
     }
+
+    /**
+     * Update time balance in Firestore when time is used
+     */
+    suspend fun updateTimeUsed(secondsUsed: Int): Boolean {
+        return try {
+            Log.d(TAG, "Updating time used: $secondsUsed seconds")
+
+            val balanceRef = firestore.collection("timeBalances").document(childId)
+            val snapshot = balanceRef.get().await()
+
+            if (!snapshot.exists()) {
+                Log.e(TAG, "Time balance document doesn't exist")
+                return false
+            }
+
+            val currentRemaining = snapshot.getLong("remainingMinutes")?.toInt() ?: 0
+            val currentUsed = snapshot.getLong("usedMinutes")?.toInt() ?: 0
+
+            // Convert seconds to minutes (round up)
+            val minutesUsed = (secondsUsed + 59) / 60
+
+            balanceRef.update(
+                mapOf(
+                    "usedMinutes" to (currentUsed + minutesUsed),
+                    "remainingMinutes" to maxOf(0, currentRemaining - minutesUsed),
+                    "lastUpdatedAt" to com.google.firebase.Timestamp.now()
+                )
+            ).await()
+
+            Log.d(TAG, "Time balance updated successfully")
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating time used", e)
+            false
+        }
+    }
+
+    /**
+     * Get current remaining time in seconds from Firestore
+     */
+    suspend fun getRemainingSeconds(): Int {
+        return try {
+            val snapshot = firestore.collection("timeBalances")
+                .document(childId)
+                .get()
+                .await()
+
+            val remainingMinutes = snapshot.getLong("remainingMinutes")?.toInt() ?: 0
+            remainingMinutes * 60 // Convert to seconds
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting remaining seconds", e)
+            0
+        }
+    }
 }

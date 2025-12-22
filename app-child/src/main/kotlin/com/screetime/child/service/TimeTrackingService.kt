@@ -9,11 +9,13 @@ import android.content.Intent
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.google.firebase.firestore.FirebaseFirestore
 import com.screetime.child.R
 import com.screetime.child.ui.MainActivity
 import com.screetime.core.common.Constants
 import com.screetime.core.common.formatAsTimeDetailed
 import kotlinx.coroutines.*
+import kotlinx.coroutines.tasks.await
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
 
@@ -30,8 +32,12 @@ class TimeTrackingService : Service(), CoroutineScope {
     private val remainingSeconds = AtomicInteger(0)
     private var isTracking = false
     private var trackingJob: Job? = null
+    private var syncJob: Job? = null
+    private var lastSyncedSeconds = 0
 
     private lateinit var notificationManager: NotificationManager
+    private val firestore = FirebaseFirestore.getInstance()
+    private val childId = "test-child-001" // TODO: Get from auth
 
     companion object {
         private const val TAG = "TimeTrackingService"
@@ -81,6 +87,11 @@ class TimeTrackingService : Service(), CoroutineScope {
         super.onDestroy()
         Log.d(TAG, "Service destroyed")
         trackingJob?.cancel()
+        syncJob?.cancel()
+        // Final sync before destroy
+        launch {
+            syncTimeWithFirestore()
+        }
         job.cancel()
     }
 
@@ -101,6 +112,7 @@ class TimeTrackingService : Service(), CoroutineScope {
 
         Log.i(TAG, "Starting time tracking with $seconds seconds")
         remainingSeconds.set(seconds)
+        lastSyncedSeconds = seconds
         isTracking = true
 
         trackingJob = launch {
@@ -133,6 +145,19 @@ class TimeTrackingService : Service(), CoroutineScope {
                 if (current % 60 == 0) {
                     validateTimeIntegrity()
                 }
+            }
+        }
+
+        // Start periodic Firestore sync
+        startFirestoreSync()
+    }
+
+    private fun startFirestoreSync() {
+        syncJob?.cancel()
+        syncJob = launch {
+            while (isActive && isTracking) {
+                delay(Constants.TIME_SYNC_INTERVAL_MS) // Sync every minute
+                syncTimeWithFirestore()
             }
         }
     }
@@ -292,5 +317,49 @@ class TimeTrackingService : Service(), CoroutineScope {
     private fun loadSavedTime(): Int {
         val prefs = getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE)
         return prefs.getInt(Constants.KEY_REMAINING_SECONDS, 0)
+    }
+
+    /**
+     * Sync time with Firestore - updates remainingMinutes and usedMinutes
+     */
+    private suspend fun syncTimeWithFirestore() {
+        try {
+            val currentSeconds = remainingSeconds.get()
+            val secondsUsed = lastSyncedSeconds - currentSeconds
+
+            if (secondsUsed <= 0) {
+                // No time used since last sync
+                return
+            }
+
+            Log.d(TAG, "Syncing with Firestore: $secondsUsed seconds used")
+
+            val balanceRef = firestore.collection("timeBalances").document(childId)
+            val snapshot = balanceRef.get().await()
+
+            if (!snapshot.exists()) {
+                Log.e(TAG, "Time balance document doesn't exist")
+                return
+            }
+
+            val currentRemaining = snapshot.getLong("remainingMinutes")?.toInt() ?: 0
+            val currentUsed = snapshot.getLong("usedMinutes")?.toInt() ?: 0
+
+            // Convert seconds to minutes (round up)
+            val minutesUsed = (secondsUsed + 59) / 60
+
+            balanceRef.update(
+                mapOf(
+                    "usedMinutes" to (currentUsed + minutesUsed),
+                    "remainingMinutes" to maxOf(0, currentRemaining - minutesUsed),
+                    "lastUpdatedAt" to com.google.firebase.Timestamp.now()
+                )
+            ).await()
+
+            lastSyncedSeconds = currentSeconds
+            Log.d(TAG, "Firestore sync successful: $minutesUsed minutes deducted")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error syncing with Firestore", e)
+        }
     }
 }
