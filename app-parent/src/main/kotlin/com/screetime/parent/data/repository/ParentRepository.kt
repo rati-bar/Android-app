@@ -71,12 +71,18 @@ class ParentRepository @Inject constructor() {
             val snapshot = firestore.collection("tasks")
                 .whereEqualTo("childId", childId)
                 .whereEqualTo("status", "COMPLETED")
-                .orderBy("completedAt", Query.Direction.DESCENDING)
                 .get()
                 .await()
 
             val tasks = snapshot.documents.mapNotNull { doc ->
                 try {
+                    // Handle completedAt as either Timestamp or Long
+                    val completedAt = when (val timestamp = doc.get("completedAt")) {
+                        is com.google.firebase.Timestamp -> timestamp.seconds * 1000
+                        is Long -> timestamp
+                        else -> null
+                    }
+
                     Task(
                         id = doc.id,
                         childId = doc.getString("childId") ?: "",
@@ -86,7 +92,7 @@ class ParentRepository @Inject constructor() {
                         rewardMinutes = doc.getLong("rewardMinutes")?.toInt() ?: 0,
                         status = TaskStatus.valueOf(doc.getString("status") ?: "PENDING"),
                         isRecurring = doc.getBoolean("isRecurring") ?: false,
-                        completedAt = doc.getLong("completedAt")
+                        completedAt = completedAt
                     )
                 } catch (e: Exception) {
                     Log.e(TAG, "Error parsing task document: ${doc.id}", e)
@@ -94,8 +100,11 @@ class ParentRepository @Inject constructor() {
                 }
             }
 
-            Log.d(TAG, "Pending tasks fetched: ${tasks.size} tasks")
-            emit(tasks)
+            // Sort by completedAt in memory (most recent first)
+            val sortedTasks = tasks.sortedByDescending { it.completedAt ?: 0 }
+
+            Log.d(TAG, "Pending tasks fetched: ${sortedTasks.size} tasks")
+            emit(sortedTasks)
         } catch (e: Exception) {
             Log.e(TAG, "Error fetching pending tasks", e)
             emit(emptyList())
