@@ -28,7 +28,6 @@ android {
     productFlavors {
         create("playstore") {
             dimension = "version"
-            applicationIdSuffix = ".lite"
             versionNameSuffix = "-lite"
 
             buildConfigField("String", "VERSION_TYPE", "\"Play Store Edition\"")
@@ -55,7 +54,6 @@ android {
         }
         debug {
             isDebuggable = true
-            applicationIdSuffix = ".debug"
         }
     }
 
