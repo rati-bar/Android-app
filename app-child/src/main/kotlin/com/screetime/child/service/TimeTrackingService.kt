@@ -70,8 +70,11 @@ class TimeTrackingService : Service(), CoroutineScope {
                 updateRemainingTime(seconds)
             }
             else -> {
-                // Default: start with saved time
-                startTimeTracking(loadSavedTime())
+                // Default: fetch time from Firestore
+                launch {
+                    val seconds = fetchTimeFromFirestore()
+                    startTimeTracking(seconds)
+                }
             }
         }
 
@@ -317,6 +320,28 @@ class TimeTrackingService : Service(), CoroutineScope {
     private fun loadSavedTime(): Int {
         val prefs = getSharedPreferences(Constants.PREFS_NAME, MODE_PRIVATE)
         return prefs.getInt(Constants.KEY_REMAINING_SECONDS, 0)
+    }
+
+    /**
+     * Fetch current remaining time from Firestore
+     */
+    private suspend fun fetchTimeFromFirestore(): Int {
+        return try {
+            Log.d(TAG, "Fetching time from Firestore")
+            val snapshot = firestore.collection("timeBalances")
+                .document(childId)
+                .get()
+                .await()
+
+            val remainingMinutes = snapshot.getLong("remainingMinutes")?.toInt() ?: 0
+            val seconds = remainingMinutes * 60
+            Log.d(TAG, "Fetched $remainingMinutes minutes ($seconds seconds) from Firestore")
+            seconds
+        } catch (e: Exception) {
+            Log.e(TAG, "Error fetching time from Firestore", e)
+            // Fallback to saved time
+            loadSavedTime()
+        }
     }
 
     /**

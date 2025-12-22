@@ -19,15 +19,30 @@ class BootReceiver : BroadcastReceiver() {
             Intent.ACTION_BOOT_COMPLETED,
             Intent.ACTION_LOCKED_BOOT_COMPLETED,
             "android.intent.action.QUICKBOOT_POWERON" -> {
-                Log.i(TAG, "Device booted - restarting services")
-
-                // Restart time tracking service
-                val serviceIntent = Intent(context, TimeTrackingService::class.java)
-                context.startForegroundService(serviceIntent)
-
-                // Log security event (potential bypass attempt)
+                Log.i(TAG, "Device booted - starting services")
+                startTrackingService(context)
                 logRebootEvent(context)
             }
+            Intent.ACTION_USER_PRESENT -> {
+                // Screen unlocked - ensure service is running
+                Log.d(TAG, "Screen unlocked - ensuring service is running")
+                startTrackingService(context)
+            }
+            Intent.ACTION_SCREEN_ON -> {
+                // Screen turned on - ensure service is running
+                Log.d(TAG, "Screen turned on - ensuring service is running")
+                startTrackingService(context)
+            }
+        }
+    }
+
+    private fun startTrackingService(context: Context) {
+        try {
+            val serviceIntent = Intent(context, TimeTrackingService::class.java)
+            context.startForegroundService(serviceIntent)
+            Log.d(TAG, "TimeTrackingService started")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to start TimeTrackingService", e)
         }
     }
 
