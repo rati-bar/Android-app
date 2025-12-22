@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "123456789000",
-    "project_id": "screetime-demo",
-    "storage_bucket": "screetime-demo.appspot.com"
+    "project_number": "297821337226",
+    "project_id": "screentimeapp-rati",
+    "storage_bucket": "screentimeapp-rati.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:123456789000:android:abcdef1234567890",
+        "mobilesdk_app_id": "1:297821337226:android:8a65c5f832a5420f015f73",
         "android_client_info": {
           "package_name": "com.screetime.child.lite"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDemoKey-Replace-With-Real-Key-If-Needed"
+          "current_key": "AIzaSyByHHQ8t-EsaJi-s-Mz1cwgM0Gk_iNOE5g"
         }
       ],
       "services": {
@@ -26,7 +26,7 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:123456789000:android:abcdef1234567891",
+        "mobilesdk_app_id": "1:297821337226:android:2027c51966dcacb0015f73",
         "android_client_info": {
           "package_name": "com.screetime.child.lite.debug"
         }
@@ -34,7 +34,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDemoKey-Replace-With-Real-Key-If-Needed"
+          "current_key": "AIzaSyByHHQ8t-EsaJi-s-Mz1cwgM0Gk_iNOE5g"
         }
       ],
       "services": {
